@@ -3,17 +3,16 @@ Tasks for maintaining the project.
 
 Execute 'invoke --list' for guidance on using Invoke
 """
-import shutil
 import platform
+import shutil
 
 from invoke import task
+
 try:
     from pathlib import Path
     Path().expanduser()
 except (ImportError, AttributeError):
     from pathlib2 import Path
-import webbrowser
-
 
 ROOT_DIR = Path(__file__).parent
 SETUP_FILE = ROOT_DIR.joinpath("setup.py")
@@ -26,8 +25,8 @@ COVERAGE_REPORT = COVERAGE_DIR.joinpath("index.html")
 DOCS_DIR = ROOT_DIR.joinpath("docs")
 DOCS_BUILD_DIR = DOCS_DIR.joinpath("_build")
 DOCS_INDEX = DOCS_BUILD_DIR.joinpath("index.html")
-PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR]]
 NOTEBOOK_DIR = ROOT_DIR.joinpath("notebooks")
+PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR, Path(__file__)]]
 
 
 def _delete_file(file):
@@ -51,8 +50,7 @@ def format(c, check=False):
     yapf_options = '--recursive {}'.format('--diff' if check else '--in-place')
     c.run("yapf {} {}".format(yapf_options, python_dirs_string))
     # Run isort
-    isort_options = '--recursive {}'.format(
-        '--check-only' if check else '')
+    isort_options = '--recursive {}'.format('--check-only' if check else '')
     c.run("isort {} {}".format(isort_options, python_dirs_string))
 
 
