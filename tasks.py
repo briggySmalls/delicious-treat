@@ -57,12 +57,27 @@ def format(c, check=False):
 
 
 @task
-def lint(c):
-    """
-    Lint code
-    """
+def lint_flake8(c):
+    """Run flake8 linter"""
     c.run("flake8 {}".format(SOURCE_DIR))
+
+
+@task
+def lint_pylint(c):
+    """Run flake8 linter"""
     c.run("pylint {}".format(SOURCE_DIR))
+
+
+@task
+def lint_mypy(c):
+    """Run type checker"""
+    c.run("mypy {} --strict".format(SOURCE_DIR))
+
+
+@task(pre=[lint_flake8, lint_pylint, lint_mypy])
+def lint(c):
+    """Lint code"""
+    pass
 
 
 @task

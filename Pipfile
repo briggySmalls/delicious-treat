@@ -16,6 +16,7 @@ pylint = "*"
 pytest = "*"
 isort = "*"
 yapf = "*"
+mypy = "*"
 
 [packages]
-delicious_treat = {path = ".", editable = true}
+delicious_treat = {path = ".",editable = true}
