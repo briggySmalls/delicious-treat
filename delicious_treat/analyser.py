@@ -34,10 +34,9 @@ def _analyse(text: str, lemmatise: bool = False) -> pd.DataFrame:
     if lemmatise:
         part_of_speech = _lemmatise(part_of_speech)
     # Build a list of tokens we wish to ignore
-    to_ignore = set(stopwords.words("english"))
-    to_ignore.union(set(punctuation))
+    to_ignore = set(stopwords.words("english")).union(set(punctuation))
     # Filter the tokens
-    valid_tokens = ~part_of_speech.isin(to_ignore)
+    valid_tokens = ~part_of_speech['token'].isin(to_ignore)
     return part_of_speech[valid_tokens]
 
 
