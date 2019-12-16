@@ -27,6 +27,7 @@ DOCS_DIR = ROOT_DIR.joinpath("docs")
 DOCS_BUILD_DIR = DOCS_DIR.joinpath("_build")
 DOCS_INDEX = DOCS_BUILD_DIR.joinpath("index.html")
 PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR]]
+NOTEBOOK_DIR = ROOT_DIR.joinpath("notebooks")
 
 
 def _delete_file(file):
@@ -110,7 +111,15 @@ def clean_tests(c):
     shutil.rmtree(COVERAGE_DIR, ignore_errors=True)
 
 
-@task(pre=[clean_python, clean_tests])
+@task
+def clean_notbooks(c):
+    notebooks = [f"'{n}'" for n in NOTEBOOK_DIR.glob('*.ipynb')]
+    c.run(("jupyter nbconvert"
+           " --ClearOutputPreprocessor.enabled=True"
+           " --inplace {}").format(" ".join(notebooks)))
+
+
+@task(pre=[clean_python, clean_tests, clean_notbooks])
 def clean(c):
     """
     Runs all clean sub-tasks
