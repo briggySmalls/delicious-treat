@@ -1,6 +1,6 @@
 """Analysis of a set of text"""
-from typing import Sequence
 from string import punctuation
+from typing import Sequence
 
 import pandas as pd
 from nltk import pos_tag
@@ -14,15 +14,14 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 def _penn2morphy(tag):
     if tag.startswith('NN'):
         return wn.NOUN
-    elif tag.startswith('VB'):
+    if tag.startswith('VB'):
         return wn.VERB
-    elif tag.startswith('JJ'):
+    if tag.startswith('JJ'):
         return wn.ADJ
-    elif tag.startswith('RB'):
+    if tag.startswith('RB'):
         return wn.ADV
-    else:
-        # Default to noun
-        return wn.NOUN
+    # Default to noun
+    return wn.NOUN
 
 
 def _analyse(text: str, lemmatise: bool = False) -> pd.DataFrame:
@@ -43,8 +42,7 @@ def _analyse(text: str, lemmatise: bool = False) -> pd.DataFrame:
 def _tokenise(text: str) -> Sequence[str]:
     # First convert into tokens
     return [
-        token.lower()
-        for sentence in sent_tokenize(text)
+        token.lower() for sentence in sent_tokenize(text)
         for token in word_tokenize(sentence)
     ]
 
@@ -62,6 +60,7 @@ def _lemmatise(part_of_speech: pd.DataFrame) -> pd.DataFrame:
         new_tag = _penn2morphy(tag)
         new_token = lemmer.lemmatize(token, pos=new_tag)
         return pd.Series([new_token, new_tag], index=["token", "tag"])
+
     # Lemmatise tokens
     return part_of_speech.apply(lemmatise_row, axis=1)
 
