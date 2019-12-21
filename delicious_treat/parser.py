@@ -5,16 +5,14 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-LINE_REGEX = (
-    r"(?P<datetime>\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}) "
-    "- (?P<name>.*?): (?P<message>.*)$"
-)
+LINE_REGEX = (r"(?P<datetime>\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}) "
+              "- (?P<name>.*?): (?P<message>.*)$")
 MEDIA_OMMITTED_MSG = "<Media omitted>"
 
 
-def parse(text):
+def parse(text: str) -> pd.DataFrame:
     """Parse an exported WhatsApp chat"""
-
+    text = text.replace('’', "'")
     # Compile the regex for matching a line
     regex = re.compile(LINE_REGEX)
     # Process the text
