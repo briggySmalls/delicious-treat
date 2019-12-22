@@ -5,7 +5,7 @@ import pandas as pd
 from nltk import pos_tag
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet as wn
-from nltk.probability import ConditionalFreqDist, FreqDist
+from nltk.probability import ConditionalFreqDist, FreqDist, defaultdict
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import sent_tokenize, word_tokenize
 
@@ -25,7 +25,7 @@ def _penn2morphy(tag: str) -> str:
 
 def _analyse(messages: pd.DataFrame, lemmatise: bool = False) -> pd.DataFrame:
     # Convert to tokens
-    tokens = _tokenise(messages)
+    tokens = _tokenise(messages['message'])
     # Get part of speech
     part_of_speech = _part_of_speech(tokens)
     # Lemmatise, if required
@@ -38,9 +38,9 @@ def _analyse(messages: pd.DataFrame, lemmatise: bool = False) -> pd.DataFrame:
     return part_of_speech[valid_tokens]
 
 
-def _tokenise(text: pd.Series) -> pd.DataFrame:
+def _tokenise(messages: pd.Series) -> pd.DataFrame:
     tokens = []
-    for i, message in enumerate(text):
+    for i, message in enumerate(messages):
         # Convert message to tokens
         new_tokens = [
             token.lower() for sentence in sent_tokenize(message)
@@ -80,3 +80,46 @@ def _freq_dist(part_of_speech: pd.DataFrame) -> FreqDist:
     for _, (token, tag, _) in part_of_speech.iterrows():
         dist[tag][token] += 1
     return dist
+
+
+class Analyser:
+    """Class to analyse messages"""
+    def __init__(self, messages: pd.Series) -> None:
+        self.messages = messages
+        self.tokens = None
+
+    def analyse(self) -> None:
+        """Run analysis (slow)"""
+        self.tokens = _analyse(self.messages, lemmatise=True)
+
+    def freq_dist(self, pos: bool = False) -> defaultdict:
+        """Obtain an nltk frequency distribution
+
+        Args:
+            pos (bool, optional): Whether to subdivide frequency distrubtion
+                                  by part of speech
+
+        Returns:
+            defaultdict: Frequency distribution
+        """
+        assert self.tokens is not None
+        if not pos:
+            return FreqDist(self.tokens['token'])
+
+        dist = ConditionalFreqDist()
+        for _, (token, tag, _) in self.tokens.iterrows():
+            dist[tag][token] += 1
+        return dist
+
+    def filter_messages(self, token: str) -> pd.DataFrame:
+        """Find messages with the given token
+
+        Args:
+            token (str): Token to filter for
+
+        Returns:
+            pd.DataFrame: Messages that contain the token
+        """
+        assert self.tokens is not None
+        message_idxs = self.tokens[self.tokens['token'] == token].message_idx
+        return self.messages.iloc[message_idxs]
